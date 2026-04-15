@@ -64,6 +64,9 @@ export default function Login() {
         <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--text-muted)', marginTop: '1rem' }}>
           New farm? <Link to="/register" style={{ color: 'var(--color-brand)', fontWeight: 500 }}>Create account</Link>
         </p>
+        <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+          Staff member? <Link to="/staff" style={{ color: 'var(--color-brand)', fontWeight: 500 }}>Sign in here →</Link>
+        </p>
       </div>
     </div>
   );
