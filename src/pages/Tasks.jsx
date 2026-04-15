@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import api from '../lib/api';
 
-function fmtDate(d) { if (!d) return ''; const [y,m,day] = d.split('-'); return `${day}/${m}/${y}`; }
+function fmtDate(d) {
+  if (!d) return '';
+  return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
 
 const PRIORITY_COLORS = { urgent: '#E24B4A', normal: '#1D9E75', low: '#888780' };
 const STATUS_LABELS = { pending: 'To do', in_progress: 'In progress', completed: 'Done', flagged: 'Issue flagged' };

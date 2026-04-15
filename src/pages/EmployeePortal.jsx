@@ -6,8 +6,7 @@ const PRIORITY_COLORS = { urgent: '#E24B4A', normal: '#1D9E75', low: '#888780' }
 
 function fmtDate(d) {
   if (!d) return '';
-  const [y,m,day] = d.split('-');
-  return `${day}/${m}/${y}`;
+  return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 export default function EmployeePortal() {
@@ -206,10 +205,16 @@ export default function EmployeePortal() {
               {/* Action buttons */}
               <div style={{ display: 'flex', gap: 8 }}>
                 {task.status === 'pending' && (
-                  <button onClick={() => updateStatus(task.id, 'in_progress')}
-                    style={{ flex: 1, padding: '10px', borderRadius: 8, background: brandColor, color: '#fff', border: 'none', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>
-                    ▶ Start
-                  </button>
+                  <>
+                    <button onClick={() => updateStatus(task.id, 'in_progress')}
+                      style={{ flex: 1, padding: '10px', borderRadius: 8, background: brandColor, color: '#fff', border: 'none', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>
+                      ▶ Start
+                    </button>
+                    <button onClick={() => updateStatus(task.id, 'flagged')}
+                      style={{ padding: '10px 14px', borderRadius: 8, background: '#FEF2F2', color: '#E24B4A', border: '1px solid #E24B4A', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>
+                      🚩
+                    </button>
+                  </>
                 )}
                 {task.status === 'in_progress' && (
                   <>
@@ -222,12 +227,6 @@ export default function EmployeePortal() {
                       🚩 Issue
                     </button>
                   </>
-                )}
-                {task.status === 'pending' && (
-                  <button onClick={() => updateStatus(task.id, 'flagged')}
-                    style={{ padding: '10px 14px', borderRadius: 8, background: '#FEF2F2', color: '#E24B4A', border: '1px solid #E24B4A', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>
-                    🚩
-                  </button>
                 )}
               </div>
             </div>
