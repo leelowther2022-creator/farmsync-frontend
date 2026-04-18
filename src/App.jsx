@@ -14,13 +14,14 @@ import Export           from './pages/Export';
 import Settings         from './pages/Settings';
 import Tasks            from './pages/Tasks';
 import EmployeePortal   from './pages/EmployeePortal';
+import Livestock        from './pages/Livestock';
 
 function MobileNav() {
   const NAV = [
     { to: '/',          icon: '▦', label: 'Home'      },
     { to: '/tasks',     icon: '✓', label: 'Tasks'     },
+    { to: '/livestock', icon: '🐄', label: 'Animals'  },
     { to: '/expenses',  icon: '↓', label: 'Expenses'  },
-    { to: '/income',    icon: '↑', label: 'Income'    },
     { to: '/employees', icon: '♟', label: 'Staff'     },
   ];
   return (
@@ -81,6 +82,7 @@ export default function App() {
           {/* Farmer app */}
           <Route path="/"          element={<PrivateLayout><Dashboard /></PrivateLayout>} />
           <Route path="/tasks"     element={<PrivateLayout><Tasks /></PrivateLayout>} />
+          <Route path="/livestock" element={<PrivateLayout><Livestock /></PrivateLayout>} />
           <Route path="/expenses"  element={<PrivateLayout><Expenses /></PrivateLayout>} />
           <Route path="/income"    element={<PrivateLayout><Income /></PrivateLayout>} />
           <Route path="/employees" element={<PrivateLayout><Employees /></PrivateLayout>} />

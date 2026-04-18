@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 const NAV = [
   { to: '/',          label: 'Dashboard', icon: '▦' },
   { to: '/tasks',     label: 'Tasks',     icon: '✓' },
+  { to: '/livestock', label: 'Livestock', icon: '🐄' },
   { to: '/expenses',  label: 'Expenses',  icon: '↓' },
   { to: '/income',    label: 'Income',    icon: '↑' },
   { to: '/employees', label: 'Employees', icon: '♟' },
