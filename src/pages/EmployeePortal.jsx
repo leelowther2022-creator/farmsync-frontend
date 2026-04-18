@@ -517,10 +517,12 @@ export default function EmployeePortal() {
     }
   }
 
-  async function loadTasks() {
+  async function loadTasks(tkn) {
+    const t = tkn || token;
+    if (!t) return;
     setLoading(true);
     try {
-      const res = await fetch(`${API}/employee-auth/my-tasks?status=active`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(`${API}/employee-auth/my-tasks?status=active`, { headers: { Authorization: `Bearer ${t}` } });
       setTasks(await res.json());
     } catch {}
     finally { setLoading(false); }
@@ -553,11 +555,11 @@ export default function EmployeePortal() {
   }
 
   function handleLogin(data) {
-    setTab('tasks');
     setToken(data.token);
     setEmployee(data.employee);
     setTenant(data.tenant);
-    loadTasks();
+    setTab('tasks');
+    loadTasks(data.token);
   }
 
   function handleSignOut() {
@@ -599,11 +601,6 @@ export default function EmployeePortal() {
         )}
       </>
     );
-  }
-
-  // Guard — data not ready yet
-  if (!employee || !tenant) {
-    return <div style={{ minHeight: '100vh', background: '#f7f6f2', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888', fontSize: 15 }}>Loading...</div>;
   }
 
   // Main app with bottom nav
