@@ -10,16 +10,28 @@ const PRIORITY_COLORS = { urgent: '#E24B4A', normal: '#1D9E75', low: '#888780' }
 const STATUS_LABELS = { pending: 'To do', in_progress: 'In progress', completed: 'Done', flagged: 'Issue flagged' };
 const STATUS_COLORS = { pending: '#888780', in_progress: '#EF9F27', completed: '#1D9E75', flagged: '#E24B4A' };
 
+const TASK_CATEGORIES = [
+  { value: 'general',      label: 'General' },
+  { value: 'weight',       label: '⚖️ Weigh animals' },
+  { value: 'treatment',    label: '💉 Treatment / medicine' },
+  { value: 'movement',     label: '📍 Move animals' },
+  { value: 'health_check', label: '🩺 Health check' },
+  { value: 'birth',        label: '🐣 Birth / lambing' },
+  { value: 'note',         label: '📝 General livestock note' },
+];
+
 const EMPTY = {
   title: '', description: '', priority: 'normal',
   due_date: new Date().toISOString().split('T')[0],
-  due_time: '', location: '', assigned_to: '', linked_equipment_id: ''
+  due_time: '', location: '', assigned_to: '', linked_equipment_id: '',
+  animal_id: '', task_category: 'general', requires_value: false, value_label: ''
 };
 
 export default function Tasks() {
   const [tasks, setTasks]         = useState([]);
   const [employees, setEmployees] = useState([]);
   const [equipment, setEquipment] = useState([]);
+  const [animals, setAnimals]     = useState([]);
   const [loading, setLoading]     = useState(true);
   const [modal, setModal]         = useState(false);
   const [editing, setEditing]     = useState(null);
@@ -33,12 +45,28 @@ export default function Tasks() {
     Promise.all([
       api.get('/employees'),
       api.get('/equipment'),
-    ]).then(([emps, equip]) => {
+      api.get('/livestock/animals'),
+    ]).then(([emps, equip, anim]) => {
       setEmployees(emps);
       setEquipment(equip?.data || equip || []);
+      setAnimals(anim || []);
     }).catch(() => {});
     load();
   }, []);
+
+  function handleCategoryChange(category) {
+    const valueMap = {
+      weight:       { requires_value: true,  value_label: 'Weight (kg)' },
+      birth:        { requires_value: true,  value_label: 'Number born' },
+      treatment:    { requires_value: false, value_label: '' },
+      movement:     { requires_value: false, value_label: '' },
+      health_check: { requires_value: false, value_label: '' },
+      note:         { requires_value: false, value_label: '' },
+      general:      { requires_value: false, value_label: '' },
+    };
+    const extra = valueMap[category] || { requires_value: false, value_label: '' };
+    setForm(f => ({ ...f, task_category: category, ...extra }));
+  }
 
   async function load() {
     setLoading(true);
@@ -52,7 +80,10 @@ export default function Tasks() {
     }
   }
 
-  function openAdd()      { setEditing(null); setForm(EMPTY); setModal(true); setError(''); setDupWarning(null); }
+  function openAdd() {
+    setEditing(null); setForm(EMPTY); setModal(true); setError(''); setDupWarning(null);
+  }
+
   function openEdit(task) {
     setEditing(task);
     setForm({
@@ -64,6 +95,10 @@ export default function Tasks() {
       location:            task.location || '',
       assigned_to:         task.assigned_to || '',
       linked_equipment_id: task.linked_equipment_id || '',
+      animal_id:           task.animal_id || '',
+      task_category:       task.task_category || 'general',
+      requires_value:      task.requires_value || false,
+      value_label:         task.value_label || '',
     });
     setModal(true); setError(''); setDupWarning(null);
   }
@@ -112,6 +147,8 @@ export default function Tasks() {
     inProgress: tasks.filter(t => t.status === 'in_progress').length,
     today:      tasks.filter(t => t.due_date?.split('T')[0] === new Date().toISOString().split('T')[0]).length,
   };
+
+  const isLivestockTask = form.task_category !== 'general';
 
   return (
     <div>
@@ -174,6 +211,7 @@ export default function Tasks() {
                     {task.employee_name && <span>👤 {task.employee_name}</span>}
                     {task.due_date && <span>📅 {fmtDate(task.due_date)}{task.due_time ? ` at ${task.due_time.slice(0,5)}` : ''}</span>}
                     {task.location && <span>📍 {task.location}</span>}
+                    {task.animal_name && <span>🐄 {task.animal_name}{task.animal_tag ? ` #${task.animal_tag}` : ''}</span>}
                     {task.completion_note && <span style={{ color: task.status === 'flagged' ? '#E24B4A' : 'var(--text-muted)' }}>💬 {task.completion_note}</span>}
                   </div>
                 </div>
@@ -254,6 +292,33 @@ export default function Tasks() {
                 <input className="form-input" placeholder="e.g. Field 7 — North boundary"
                   value={form.location} onChange={e => setForm(f => ({ ...f, location: e.target.value }))} />
               </div>
+
+              {/* Livestock section */}
+              <div style={{ borderTop: '0.5px solid var(--border)', marginTop: '0.75rem', paddingTop: '0.75rem' }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Livestock (optional)</div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">Task type</label>
+                    <select className="form-input" value={form.task_category} onChange={e => handleCategoryChange(e.target.value)}>
+                      {TASK_CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+                    </select>
+                  </div>
+                  {isLivestockTask && animals.length > 0 && (
+                    <div className="form-group">
+                      <label className="form-label">Animal / group</label>
+                      <select className="form-input" value={form.animal_id} onChange={e => setForm(f => ({ ...f, animal_id: e.target.value }))}>
+                        <option value="">Select animal</option>
+                        {animals.map(a => (
+                          <option key={a.id} value={a.id}>
+                            {a.name || ''}{a.tag ? ` #${a.tag}` : ''} ({a.type})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <div className="form-group">
                 <label className="form-label">Link to equipment</label>
                 <select className="form-input" value={form.linked_equipment_id} onChange={e => setForm(f => ({ ...f, linked_equipment_id: e.target.value }))}>
