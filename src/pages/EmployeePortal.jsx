@@ -553,6 +553,7 @@ export default function EmployeePortal() {
   }
 
   function handleLogin(data) {
+    setTab('tasks');
     setToken(data.token);
     setEmployee(data.employee);
     setTenant(data.tenant);
@@ -598,6 +599,11 @@ export default function EmployeePortal() {
         )}
       </>
     );
+  }
+
+  // Guard — data not ready yet
+  if (!employee || !tenant) {
+    return <div style={{ minHeight: '100vh', background: '#f7f6f2', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888', fontSize: 15 }}>Loading...</div>;
   }
 
   // Main app with bottom nav
